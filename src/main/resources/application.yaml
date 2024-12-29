@@ -1,0 +1,8 @@
+rpc:
+  base:
+    url: https://api.mainnet-beta.solana.com
+
+mongodb:
+  name: transactions
+
+
