@@ -13,7 +13,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 public class RedisConfig {
 
     @Bean
-    private ReactiveRedisOperations<String, Integer> slotNumberRedisTemplate(ReactiveRedisConnectionFactory factory) {
+    public ReactiveRedisOperations<String, Integer> slotNumberRedisTemplate(ReactiveRedisConnectionFactory factory) {
         Jackson2JsonRedisSerializer<Integer> serializer = new Jackson2JsonRedisSerializer<>(Integer.class);
         RedisSerializationContext.RedisSerializationContextBuilder<String, Integer> builder =
                 RedisSerializationContext.newSerializationContext(new StringRedisSerializer());

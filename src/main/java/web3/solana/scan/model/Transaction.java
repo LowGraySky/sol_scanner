@@ -14,7 +14,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 public class Transaction {
 
-    @Id()
+    @Id
     private String tx;
     private String info;
 }

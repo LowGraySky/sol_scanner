@@ -42,7 +42,7 @@ public class SolanaAnalyseService {
 
     private Transaction toTransaction(GetBlockMethodResponse.TransactionModel transactionModel) {
         return new Transaction(
-                transactionModel.getSignatures().get(0),
+                transactionModel.getSignatures().getFirst(),
                 objectMapper.convertValue(transactionModel, String.class)
         );
     }
