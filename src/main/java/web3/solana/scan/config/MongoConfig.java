@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.config.AbstractReactiveMongoConfiguratio
 import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories;
 
 @Configuration
-@EnableReactiveMongoRepositories
+@EnableReactiveMongoRepositories(basePackages = "web3.solana.scan.repository")
 public class MongoConfig extends AbstractReactiveMongoConfiguration {
 
     @Value("${mongodb.name}")
