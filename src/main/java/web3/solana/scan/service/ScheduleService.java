@@ -14,11 +14,12 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class ScheduleService {
 
+  private static final Duration TASK_DURATION = Duration.ofSeconds(5);
   private final SolanaAnalyseService analyseService;
 
   @PostConstruct
   private void start() {
-    Flux.interval(Duration.ofSeconds(30), Duration.ofMinutes(2))
+    Flux.interval(TASK_DURATION)
             .doOnNext(task -> log.info("TASK: Start execute analyse task"))
             .flatMap(x -> analyseService.analyse())
             .subscribeOn(Schedulers.immediate())

@@ -39,8 +39,7 @@ public class RequestService {
             .header(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_HEADER_VALUE)
             .retrieve()
             .onStatus(HttpStatusCode::isError, errorRequest(request))
-            .toEntity(new ParameterizedTypeReference<MethodResponse<Integer>>() {
-            })
+            .toEntity(new ParameterizedTypeReference<MethodResponse<Integer>>() {})
             .doOnNext(response -> log.info(
                     "INFO: Got response by '{}' request, response: {}",
                     request.getMethod(),
