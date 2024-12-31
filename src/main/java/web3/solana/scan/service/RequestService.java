@@ -13,6 +13,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import web3.solana.scan.model.request.GetBlockMethodRequest;
 import web3.solana.scan.model.request.GetSlotMethodRequest;
+import web3.solana.scan.model.request.MethodRequest;
 import web3.solana.scan.model.response.GetBlockMethodResponse;
 import web3.solana.scan.model.response.MethodResponse;
 
@@ -25,43 +26,55 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class RequestService {
 
-    private static final String APPLICATION_JSON_HEADER_VALUE = "application/json";
-    @Value("${rpc.base.url}")
-    private String baseUrl;
+  private static final String APPLICATION_JSON_HEADER_VALUE = "application/json";
+  private final WebClient webClient;
+  @Value("${rpc.base.url}")
+  private String baseUrl;
 
-    private final WebClient webClient;
+  public Mono<MethodResponse<Integer>> getSlot() {
+    GetSlotMethodRequest request = new GetSlotMethodRequest();
+    return webClient.post()
+            .uri(baseUrl)
+            .bodyValue(request)
+            .header(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_HEADER_VALUE)
+            .retrieve()
+            .onStatus(HttpStatusCode::isError, errorRequest(request))
+            .toEntity(new ParameterizedTypeReference<MethodResponse<Integer>>() {
+            })
+            .doOnNext(response -> log.info(
+                    "INFO: Got response by '{}' request, response: {}",
+                    request.getMethod(),
+                    response.toString()))
+            .map(ResponseEntity::getBody);
+  }
 
-    public Mono<MethodResponse<Integer>> getSlot() {
-        GetSlotMethodRequest request = new GetSlotMethodRequest();
-        return webClient.post()
-                .uri(baseUrl)
-                .bodyValue(request)
-                .header(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_HEADER_VALUE)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, errorRequest())
-                .toEntity(new ParameterizedTypeReference<MethodResponse<Integer>>() {})
-                .map(ResponseEntity::getBody);
-    }
+  public Mono<MethodResponse<GetBlockMethodResponse>> getBlock(int slotNumber) {
+    List<Object> requestObject = new ArrayList<>();
+    requestObject.add(slotNumber);
 
-    public Mono<MethodResponse<GetBlockMethodResponse>> getBlock(int slotNumber) {
-        List<Object> requestObject = new ArrayList<>();
-        requestObject.add(slotNumber);
+    GetBlockMethodRequest request = new GetBlockMethodRequest(requestObject);
+    return webClient.post()
+            .uri(baseUrl)
+            .bodyValue(request)
+            .header(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_HEADER_VALUE)
+            .retrieve()
+            .onStatus(HttpStatusCode::isError, errorRequest(request))
+            .toEntity(new ParameterizedTypeReference<MethodResponse<GetBlockMethodResponse>>() {
+            })
+            .doOnNext(response -> log.info(
+                    "INFO: Got response by '{}' request, response status: {}",
+                    request.getMethod(),
+                    response.getStatusCode()))
+            .map(ResponseEntity::getBody);
+  }
 
-        GetBlockMethodRequest request = new GetBlockMethodRequest(requestObject);
-        return webClient.post()
-                .uri(baseUrl)
-                .bodyValue(request)
-                .header(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_HEADER_VALUE)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, errorRequest())
-                .toEntity(new ParameterizedTypeReference<MethodResponse<GetBlockMethodResponse>>() {})
-                .map(ResponseEntity::getBody);
-    }
-
-    private Function<ClientResponse, Mono<? extends Throwable>> errorRequest() {
-        return response -> {
-            log.error("");
-            return Mono.just(new RuntimeException(""));
-        };
-    }
+  private Function<ClientResponse, Mono<? extends Throwable>> errorRequest(MethodRequest request) {
+    return response -> response
+            .toEntity(String.class)
+            .doOnNext(r -> log.error("ERROR: Error when request to: {}, status: {}, error: {}",
+                    request.getMethod(),
+                    r.getStatusCode(),
+                    r.getBody()))
+            .map(r -> new RuntimeException(""));
+  }
 }

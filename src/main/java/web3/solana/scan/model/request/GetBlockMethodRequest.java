@@ -7,7 +7,7 @@ public class GetBlockMethodRequest extends MethodRequestWithParams<List<Object>>
     private final List<Object> params;
 
     @Override
-    protected String getMethod() {
+    public String getMethod() {
         return "getBlock";
     }
 

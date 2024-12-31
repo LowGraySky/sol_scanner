@@ -8,5 +8,5 @@ public abstract class MethodRequest implements RpcCall {
     @JsonProperty("method")
     private final String method = getMethod();
 
-    protected abstract String getMethod();
+    public abstract String getMethod();
 }
